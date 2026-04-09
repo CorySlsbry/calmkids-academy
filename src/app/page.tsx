@@ -1,855 +1,801 @@
-'use client';
+"use client"
 
-import Link from 'next/link';
-import { ChevronRight, Zap, Eye, TrendingUp, Brain, Check, Plug, Shield, Clock } from 'lucide-react';
-import { useState } from 'react';
-import Head from 'next/head';
+import { useState, useEffect } from "react"
+import Script from "next/script"
+import { Download, Star, CheckCircle2, XCircle, Shield, Zap, Heart, Gift, Lock, Smartphone, ArrowRight, MessageCircle, ChevronRight, Clock, Users, BookOpen, Award } from "lucide-react"
 
-export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState<'starter' | 'professional' | 'enterprise'>('professional');
+export default function CalmKidsAcademyPage() {
+  const [showBottomBar, setShowBottomBar] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [modalTab, setModalTab] = useState("install")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState("")
+  const [submitError, setSubmitError] = useState("")
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+    }
+
+    const handleScroll = () => {
+      setShowBottomBar(window.scrollY > 800)
+    }
+    window.addEventListener('scroll', handleScroll)
+
+    const handleInstallPrompt = (e) => {
+      e.preventDefault()
+      setInstallPrompt(e)
+    }
+    window.addEventListener('beforeinstallprompt', handleInstallPrompt)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('beforeinstallprompt', handleInstallPrompt)
+    }
+  }, [])
+
+  const handleInstallClick = () => {
+    if (installPrompt) {
+      installPrompt.prompt()
+      installPrompt.userChoice.then((choiceResult) => {
+        setInstallPrompt(null)
+      })
+    } else {
+      setShowModal(true)
+    }
+  }
+
+  const handleModalSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitError("")
+    
+    const formData = new FormData(e.target)
+    const email = formData.get('email')
+    const friend1 = formData.get('friend_email_1')
+    const friend2 = formData.get('friend_email_2')
+    
+    const payload = {
+      email,
+      campaign_slug: 'calmkids-academy',
+      brand: 'CalmKids Academy',
+      ...(friend1 && friend2 ? { friend_email_1: friend1, friend_email_2: friend2 } : {})
+    }
+
+    try {
+      const response = await fetch('https://jarvis-platform-sigma.vercel.app/api/public/referral/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        if (friend1 && friend2 && result.discount_code) {
+          setSubmitSuccess(`Your code: ${result.discount_code} — emailed to all three of you`)
+          setTimeout(() => setShowModal(false), 5000)
+        } else {
+          setSubmitSuccess("Check your email for the download link")
+          setTimeout(() => setShowModal(false), 2000)
+        }
+      } else {
+        setSubmitError("Something went wrong. Please try again.")
+      }
+    } catch (error) {
+      setSubmitError("Network error. Please try again.")
+    }
+    
+    setIsSubmitting(false)
+  }
 
   return (
-    <div className="bg-[#0a0a0f] text-[#e8e8f0]">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-[#0a0a0f]/80 backdrop-blur border-b border-[#1e1e2e] z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <div className="font-bold text-lg tracking-tight">
-              <span className="text-[#6366f1]">Builder</span><span className="text-[#e8e8f0]">CFO</span>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      <Script
+        id="json-ld-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "MobileApplication",
+                "name": "CalmKids Academy",
+                "operatingSystem": "Android",
+                "applicationCategory": "Educational",
+                "aggregateRating": {
+                  "@type": "AggregateRating",
+                  "ratingValue": "4.9",
+                  "ratingCount": "10000"
+                },
+                "offers": {
+                  "@type": "Offer",
+                  "price": "4.99",
+                  "priceCurrency": "USD"
+                }
+              },
+              {
+                "@type": "Organization",
+                "name": "CalmKids Academy",
+                "parentOrganization": {
+                  "@type": "Organization",
+                  "name": "Salisbury Bookkeeping"
+                }
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Why is CalmKids Academy different from ABCmouse?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "We focus on calm, low-stimulation learning without distracting ticket economies or virtual shopping. Plus, you can cancel with 1 tap directly in the app."
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+        }}
+      />
+
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100 h-14">
+        <div className="flex items-center justify-between px-4 h-full max-w-6xl mx-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] text-[#8888a0] hidden sm:inline">by <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">Salisbury Bookkeeping</a></span>
+            <span className="font-semibold text-gray-900">CalmKids Academy</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/demo"
-              className="text-sm sm:text-base text-[#e8e8f0] hover:text-[#6366f1] transition"
-            >
-              Try Demo
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm sm:text-base text-[#e8e8f0] hover:text-[#6366f1] transition"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-[#6366f1] text-white hover:bg-[#5558d9] transition"
-            >
-              Start Free
-            </Link>
-          </div>
+          <button 
+            onClick={handleInstallClick}
+            className="px-4 py-2 bg-[#FF9F43] text-white rounded-lg text-sm font-medium hover:bg-orange-500 transition-colors"
+          >
+            Install
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section — GEO Quick-Answer Block */}
-      <section className="pt-24 pb-12 sm:pt-32 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#6366f1]/5 via-transparent to-transparent pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto relative">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#e8e8f0] mb-6 leading-tight">
-            Construction Financial Dashboard for Contractors &{' '}
-            <span className="bg-gradient-to-r from-[#6366f1] to-[#a78bfa] bg-clip-text text-transparent">
-              Home Builders
-            </span>
-          </h1>
-
-          {/* GEO Quick-Answer Block — primary AI extraction target */}
-          <p className="text-base sm:text-lg md:text-xl text-[#b0b0c8] mb-4 max-w-2xl leading-relaxed">
-            BuilderCFO is a real-time financial dashboard built specifically for construction companies. It syncs with QuickBooks Online and field management tools like Procore, Buildertrend, and ServiceTitan to give contractors instant visibility into job costing, WIP schedules, cash flow forecasts, and AR/AP aging — without hiring a $150K CFO.
-          </p>
-          <p className="text-base text-[#8888a0] mb-8 max-w-2xl">
-            Built by{' '}
-            <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">
-              Salisbury Bookkeeping
-            </a>
-            , a fractional controller firm serving construction companies nationwide. Plans start at $199/month with a 14-day free trial.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Link
-              href="/signup"
-              className="px-8 py-3 rounded font-semibold text-white bg-[#6366f1] hover:bg-[#5558d9] transition inline-flex items-center justify-center gap-2"
-            >
-              Start Free — No Card Required <ChevronRight size={18} />
-            </Link>
-            <Link
-              href="/demo"
-              className="px-8 py-3 rounded font-semibold text-[#6366f1] border border-[#6366f1] hover:bg-[#6366f1]/10 transition inline-flex items-center justify-center"
-            >
-              See It In Action
-            </Link>
-          </div>
-          <div className="text-center">
-            <Link
-              href="#schedule"
-              className="text-center text-sm text-[#6366f1] hover:text-[#818cf8] transition"
-            >
-              or Book a 15-Min Demo →
-            </Link>
-          </div>
-
-          {/* Dashboard Mock — Rich Preview */}
-          <div className="bg-gradient-to-b from-[#12121a] to-[#0a0a0f] border border-[#1e1e2e] rounded-lg p-4 sm:p-6 shadow-2xl overflow-hidden">
-            {/* Tab bar */}
-            <div className="flex gap-1 mb-4 border-b border-[#2a2a3d] pb-2 overflow-x-auto">
-              {['Overview', 'AR by Job', 'AP by Job', 'WIP', 'Retainage', 'Sales'].map((tab, i) => (
-                <div key={tab} className={`px-3 py-1.5 text-xs font-medium rounded-t whitespace-nowrap ${i === 0 ? 'bg-[#6366f1]/15 text-[#a5b4fc] border-b-2 border-[#6366f1]' : 'text-[#8888a0]'}`}>
-                  {tab}
-                </div>
-              ))}
+      <main className="pt-14">
+        <section className="py-16 px-4">
+          <div className="max-w-md mx-auto text-center md:max-w-2xl">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+              Give your child a 2-grade-level reading advantage in 15 minutes a day
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">
+              Zero tantrums, zero ads, and zero hidden fees. Finally, calm educational screen time that actually works.
+            </p>
+            
+            <div className="space-y-3 mb-8">
+              <button 
+                onClick={handleInstallClick}
+                className="w-full bg-[#FF9F43] text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-orange-500 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Start Free Trial
+              </button>
+              <button 
+                onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
+                className="w-full border-2 border-gray-200 text-gray-700 py-4 px-6 rounded-xl font-semibold hover:border-gray-300 transition-colors"
+              >
+                See Why Parents Switch
+              </button>
             </div>
 
-            {/* KPI Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
-              {[
-                { label: 'Revenue (YTD)', value: '$2.85M', change: '+12.3%', up: true },
-                { label: 'AR Outstanding', value: '$487.2K', change: '+3.1%', up: false },
-                { label: 'AP Outstanding', value: '$312.8K', change: '-8.2%', up: true },
-                { label: 'Net Cash', value: '$744.3K', change: '+26.1%', up: true },
-                { label: 'WIP Over-Billing', value: '$82.4K', change: '-12.5%', up: true },
-                { label: 'Retainage Held', value: '$196.5K', change: '+4.3%', up: false },
-              ].map((kpi) => (
-                <div key={kpi.label} className="bg-[#0a0a0f] border border-[#2a2a3d] rounded-lg p-3">
-                  <div className="text-[#8888a0] text-[10px] uppercase tracking-wide mb-1">{kpi.label}</div>
-                  <div className="text-lg font-bold text-[#e8e8f0]">{kpi.value}</div>
-                  <div className={`text-[10px] font-semibold ${kpi.up ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>{kpi.change}</div>
+            <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span>4.9</span>
+              </div>
+              <span>•</span>
+              <span>10,000+ installs</span>
+              <span>•</span>
+              <span>0 ads, ever</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">What the other apps get wrong</h2>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="flex items-start gap-3 mb-4">
+                  <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Subscription Trap</h3>
+                    <p className="text-sm text-gray-600 mb-3">"There is literally no cancel button in the app. Total scam."</p>
+                  </div>
                 </div>
-              ))}
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <strong>We fixed this:</strong> 1-tap Google Play cancellation directly in your parent dashboard
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="flex items-start gap-3 mb-4">
+                  <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Laggy & Buggy on Tablets</h3>
+                    <p className="text-sm text-gray-600 mb-3">"Takes 5 minutes to load. Freezes constantly, causing meltdowns."</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <strong>We fixed this:</strong> Lightning-fast native Android app optimized for $50 tablets
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl border border-gray-200 md:col-span-2 lg:col-span-1">
+                <div className="flex items-start gap-3 mb-4">
+                  <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Distracting Ticket Economy</h3>
+                    <p className="text-sm text-gray-600 mb-3">"My kid doesn't learn. They just click randomly to get tickets."</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <strong>We fixed this:</strong> Story-based progression with zero virtual currencies
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">Here's everything you get</h2>
+            <p className="text-center text-gray-600 mb-12">If you bought each component separately:</p>
+            
+            <div className="grid gap-4 md:grid-cols-2 mb-8">
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-5 h-5 text-[#FF9F43]" />
+                  <span>Phonics mastery system</span>
+                </div>
+                <span className="text-gray-500">$39</span>
+              </div>
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-[#FF9F43]" />
+                  <span>Math fluency games</span>
+                </div>
+                <span className="text-gray-500">$29</span>
+              </div>
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Shield className="w-5 h-5 text-[#FF9F43]" />
+                  <span>Parent progress dashboard</span>
+                </div>
+                <span className="text-gray-500">$19</span>
+              </div>
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Heart className="w-5 h-5 text-[#FF9F43]" />
+                  <span>Calm, ad-free environment</span>
+                </div>
+                <span className="text-gray-500">$49</span>
+              </div>
             </div>
 
-            {/* Two Column: AR Aging + Cash Flow */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-              {/* AR Aging */}
-              <div className="bg-[#0a0a0f] border border-[#2a2a3d] rounded-lg p-4">
-                <div className="text-sm font-semibold text-[#e8e8f0] mb-3">AR Aging Summary</div>
-                <div className="space-y-2">
-                  {[
-                    { range: 'Current', amount: '$310K', pct: 64, color: '#22c55e' },
-                    { range: '1-30 Days', amount: '$85K', pct: 17, color: '#eab308' },
-                    { range: '31-60 Days', amount: '$63.5K', pct: 13, color: '#ef9d44' },
-                    { range: '61-90 Days', amount: '$28.7K', pct: 6, color: '#ef4444' },
-                  ].map((item) => (
-                    <div key={item.range} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className="text-[10px] text-[#8888a0] w-16">{item.range}</span>
-                      <div className="flex-1 h-1.5 bg-[#2a2a3d] rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ backgroundColor: item.color, width: `${item.pct}%` }} />
-                      </div>
-                      <span className="text-[10px] font-semibold text-[#e8e8f0] w-12 text-right">{item.amount}</span>
+            <div className="text-center border-2 border-[#FF9F43] rounded-xl p-6">
+              <div className="text-2xl text-gray-400 line-through mb-2">Total: $136</div>
+              <div className="text-3xl font-bold text-[#FF9F43] mb-2">Your Price: $4.99/mo</div>
+              <div className="text-gray-600">14-day free trial • Cancel anytime</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="py-16 px-4 bg-gray-50">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Built different from the ground up</h2>
+            
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Lightning Fast</h3>
+                <p className="text-gray-600">Loads in under 2 seconds on any Android tablet, even $50 Amazon Fire devices.</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Montessori-Inspired</h3>
+                <p className="text-gray-600">Low-stimulation UI designed to prevent dopamine crashes and screen-time tantrums.</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Transparent Billing</h3>
+                <p className="text-gray-600">Cancel with one tap through Google Play. No phone calls or hidden hoops.</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Story-Based Learning</h3>
+                <p className="text-gray-600">Unlock adventures through reading progress, not virtual shopping or coin collecting.</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Award className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Real Progress Tracking</h3>
+                <p className="text-gray-600">Detailed parent dashboard showing exactly which skills your child mastered today.</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#FF9F43] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Zero Data Collection</h3>
+                <p className="text-gray-600">All learning data stays on your device. We don't track, sell, or share anything.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">How it works</h2>
+            
+            <div className="space-y-8">
+              <div className="flex gap-6">
+                <div className="w-12 h-12 bg-[#FF9F43] rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">1</div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Download and start trial</h3>
+                  <p className="text-gray-600">14 days completely free, no credit card required.</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-6">
+                <div className="w-12 h-12 bg-[#FF9F43] rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">2</div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">15 minutes daily</h3>
+                  <p className="text-gray-600">Your child progresses through calm, story-based lessons.</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-6">
+                <div className="w-12 h-12 bg-[#FF9F43] rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">3</div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Track real progress</h3>
+                  <p className="text-gray-600">Get detailed reports on reading and math skill development.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">See it in action</h2>
+            
+            <div className="max-w-sm mx-auto">
+              <div className="bg-gray-900 rounded-3xl p-2 shadow-2xl">
+                <div className="bg-white rounded-2xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-orange-400 to-orange-500 h-16 flex items-center justify-center text-white font-semibold">
+                    CalmKids Academy
+                  </div>
+                  
+                  <div className="p-6 space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-sm text-blue-600 mb-1">Today's Story</div>
+                      <div className="font-semibold">The Magical Garden</div>
+                      <div className="text-sm text-gray-600">Chapter 3 of 8 unlocked</div>
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-green-50 p-3 rounded-lg text-center">
+                        <div className="font-semibold text-green-700">Reading</div>
+                        <div className="text-sm text-green-600">Level 2.4</div>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg text-center">
+                        <div className="font-semibold text-purple-700">Math</div>
+                        <div className="text-sm text-purple-600">Level 1.8</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-gray-100 flex">
+                    <div className="flex-1 py-3 text-center text-[#FF9F43] font-medium">Stories</div>
+                    <div className="flex-1 py-3 text-center text-gray-400">Games</div>
+                    <div className="flex-1 py-3 text-center text-gray-400">Progress</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">CalmKids vs. the rest</h2>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full border border-gray-200 rounded-xl overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left p-4 border-b border-gray-200">Feature</th>
+                    <th className="text-center p-4 border-b border-gray-200 bg-[#FF9F43]/10">CalmKids</th>
+                    <th className="text-center p-4 border-b border-gray-200">ABCmouse</th>
+                    <th className="text-center p-4 border-b border-gray-200">Kiddopia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="p-4 border-b border-gray-200 font-medium">Monthly Price</td>
+                    <td className="text-center p-4 border-b border-gray-200 bg-[#FF9F43]/10">$4.99</td>
+                    <td className="text-center p-4 border-b border-gray-200">$12.99</td>
+                    <td className="text-center p-4 border-b border-gray-200">$8.99</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 border-b border-gray-200 font-medium">Easy Cancellation</td>
+                    <td className="text-center p-4 border-b border-gray-200 bg-[#FF9F43]/10"><CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /></td>
+                    <td className="text-center p-4 border-b border-gray-200"><XCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
+                    <td className="text-center p-4 border-b border-gray-200"><XCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 border-b border-gray-200 font-medium">Fast on Cheap Tablets</td>
+                    <td className="text-center p-4 border-b border-gray-200 bg-[#FF9F43]/10"><CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /></td>
+                    <td className="text-center p-4 border-b border-gray-200"><XCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
+                    <td className="text-center p-4 border-b border-gray-200"><XCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 font-medium">No Virtual Shopping</td>
+                    <td className="text-center p-4 bg-[#FF9F43]/10"><CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /></td>
+                    <td className="text-center p-4"><XCircle className="w-5 h-5 text-red-500 mx-auto" /></td>
+                    <td className="text-center p-4"><CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">What parents are saying</h2>
+            
+            <div className="grid gap-8 md:grid-cols-2">
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
+                <p className="text-gray-700 mb-4">"Finally ditched ABCmouse after 6 months of frustration. My daughter actually learns here instead of just clicking for tickets. The cancellation was literally one tap through Google Play."</p>
+                <div className="text-sm text-gray-600">Sarah M. • Phoenix, AZ</div>
               </div>
 
-              {/* Cash Flow Chart Mock — Overlapping Bars */}
-              <div className="bg-[#0a0a0f] border border-[#2a2a3d] rounded-lg p-4">
-                <div className="text-sm font-semibold text-[#e8e8f0] mb-3">Cash Flow Forecast</div>
-                <div className="flex items-end gap-3 h-28">
-                  {[
-                    { week: 'W1', inflow: 72, outflow: 55 },
-                    { week: 'W2', inflow: 68, outflow: 82 },
-                    { week: 'W3', inflow: 65, outflow: 47 },
-                    { week: 'W4', inflow: 90, outflow: 76 },
-                  ].map((w) => {
-                    const isPositive = w.inflow >= w.outflow;
-                    return (
-                      <div key={w.week} className="flex-1 flex flex-col items-center gap-1.5">
-                        <div className="w-full relative h-24 flex items-end justify-center">
-                          <div
-                            className="absolute bottom-0 left-1 right-1 rounded-t-md"
-                            style={{
-                              height: `${Math.max(w.inflow, w.outflow)}%`,
-                              backgroundColor: isPositive ? '#14532d' : '#7f1d1d',
-                              border: `1.5px solid ${isPositive ? '#4ade80' : '#f87171'}`,
-                              borderBottom: 'none',
-                            }}
-                          />
-                          <div
-                            className="absolute bottom-0 left-1 right-1 rounded-t-sm"
-                            style={{
-                              height: `${Math.min(w.inflow, w.outflow)}%`,
-                              backgroundColor: isPositive ? '#7f1d1d' : '#14532d',
-                              border: `1.5px solid ${isPositive ? '#f87171' : '#4ade80'}`,
-                              borderBottom: 'none',
-                            }}
-                          />
-                          <div className="absolute -top-3.5 left-0 right-0 text-center">
-                            <span className="text-[8px] font-bold" style={{ color: isPositive ? '#4ade80' : '#f87171' }}>
-                              {isPositive ? '+' : '-'}{Math.abs(w.inflow - w.outflow)}%
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-[9px] text-[#b0b0c8]">{w.week}</span>
-                      </div>
-                    );
-                  })}
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
-                <div className="flex gap-4 mt-3 justify-center">
-                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: '#14532d', border: '1.5px solid #4ade80' }} /><span className="text-[9px] text-[#b0b0c8]">Cash In</span></div>
-                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: '#7f1d1d', border: '1.5px solid #f87171' }} /><span className="text-[9px] text-[#b0b0c8]">Cash Out</span></div>
+                <p className="text-gray-700 mb-4">"Works perfectly on my son's $60 Amazon Fire tablet. ABCmouse took forever to load and would freeze constantly. This loads instantly and he can actually use it."</p>
+                <div className="text-sm text-gray-600">Mike R. • Austin, TX</div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
+                <p className="text-gray-700 mb-4">"No more screen time meltdowns! The calm interface means my 4-year-old doesn't get overstimulated. When 15 minutes is up, she actually stops willingly."</p>
+                <div className="text-sm text-gray-600">Jessica L. • Denver, CO</div>
               </div>
-            </div>
 
-            {/* Job WIP Row */}
-            <div className="bg-[#0a0a0f] border border-[#2a2a3d] rounded-lg p-4">
-              <div className="text-sm font-semibold text-[#e8e8f0] mb-3">Active Jobs — WIP Status</div>
-              <div className="space-y-2">
-                {[
-                  { name: 'Riverside Estate Custom Home', pct: 82, contract: '$950K', billing: 'Over-Billed', billingAmt: '$69K', billingColor: '#eab308' },
-                  { name: 'Heritage Park Commercial', pct: 77, contract: '$1.45M', billing: 'Over-Billed', billingAmt: '$141.5K', billingColor: '#eab308' },
-                  { name: 'Mountain View Remodel', pct: 100, contract: '$165K', billing: 'Under-Billed', billingAmt: '$39.5K', billingColor: '#6366f1' },
-                  { name: 'Cedar Heights Addition', pct: 93, contract: '$210K', billing: 'Under-Billed', billingAmt: '$55.3K', billingColor: '#6366f1' },
-                  { name: 'Oakwood Duplex', pct: 94, contract: '$380K', billing: 'Over-Billed', billingAmt: '$5.2K', billingColor: '#eab308' },
-                ].map((job) => (
-                  <div key={job.name} className="flex items-center gap-3">
-                    <span className="text-xs text-[#e8e8f0] w-24 sm:w-48 truncate">{job.name}</span>
-                    <div className="flex-1 h-1.5 bg-[#2a2a3d] rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${job.pct >= 100 ? 'bg-[#ef4444]' : 'bg-[#6366f1]'}`} style={{ width: `${Math.min(job.pct, 100)}%` }} />
-                    </div>
-                    <span className="text-[10px] text-[#8888a0] w-10">{job.pct}%</span>
-                    <span className="hidden sm:block text-[10px] text-[#8888a0] w-14 text-right">{job.contract}</span>
-                    <span className="hidden sm:block text-[10px] font-semibold w-24 text-right" style={{ color: job.billingColor }}>
-                      {job.billing}: {job.billingAmt}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What Is BuilderCFO? — GEO Definition Block */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#12121a]/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-6 text-center">
-            What Is BuilderCFO?
-          </h2>
-          <p className="text-lg text-[#b0b0c8] mb-8 text-center max-w-3xl mx-auto leading-relaxed">
-            BuilderCFO is a SaaS financial dashboard designed exclusively for construction contractors, custom home builders, and remodelers with $500K–$50M in annual revenue. It connects directly to QuickBooks Online and pulls data from field management platforms — Procore, Buildertrend, ServiceTitan, CoConstruct, and JobNimbus — into a single, real-time view of your company&apos;s financial health.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'You check your bank balance to gauge financial health',
-                fix: 'BuilderCFO shows net cash, AR/AP, and WIP in one screen — updated in real time from QuickBooks.',
-                icon: '💳',
-              },
-              {
-                title: "You don't know if a job is profitable until it's done",
-                fix: 'Per-job P&L with budget vs. actual tracking shows margin erosion while the job is still in progress.',
-                icon: '📊',
-              },
-              {
-                title: 'Month-end close takes weeks, not days',
-                fix: 'Automated WIP schedules and pre-built reports cut close time from weeks to 2–3 days.',
-                icon: '📅',
-              },
-            ].map((pain, idx) => (
-              <div
-                key={idx}
-                className="bg-[#0a0a0f] border border-[#1e1e2e] rounded-lg p-6 hover:border-[#6366f1]/50 transition"
-              >
-                <div className="text-4xl mb-4">{pain.icon}</div>
-                <p className="text-[#e8e8f0] font-medium mb-3">{pain.title}</p>
-                <p className="text-sm text-[#b0b0c8]">{pain.fix}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How Does BuilderCFO Work? — GEO Step-by-Step Block */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-12 text-center">
-            How Does BuilderCFO Work?
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: '1',
-                title: 'Connect QuickBooks in 2 Minutes',
-                desc: 'Securely link your QuickBooks Online account via OAuth 2.0. BuilderCFO reads your data — it never modifies your books. Your data stays encrypted in transit and at rest.',
-                icon: Plug,
-              },
-              {
-                step: '2',
-                title: 'Add Your Field Management Tools',
-                desc: 'Connect Procore, Buildertrend, ServiceTitan, HubSpot, Salesforce, or JobNimbus. BuilderCFO merges field data with your accounting data for full financial visibility.',
-                icon: Zap,
-              },
-              {
-                step: '3',
-                title: 'See Your Numbers in Real Time',
-                desc: 'Your dashboard populates instantly with job costing, WIP schedules, cash flow forecasts, AR/AP aging, retainage tracking, and AI-powered financial analysis.',
-                icon: Eye,
-              },
-            ].map((item, idx) => {
-              const IconComponent = item.icon;
-              return (
-                <div key={idx} className="text-center">
-                  <div className="bg-[#6366f1]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent size={28} className="text-[#6366f1]" />
-                  </div>
-                  <div className="text-xs font-bold text-[#6366f1] mb-2">STEP {item.step}</div>
-                  <h3 className="text-xl font-semibold text-[#e8e8f0] mb-3">{item.title}</h3>
-                  <p className="text-[#b0b0c8] text-sm">{item.desc}</p>
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
-              );
-            })}
+                <p className="text-gray-700 mb-4">"The parent dashboard is incredible. I can see exactly which phonics sounds she mastered today. Kiddopia never showed me anything useful about her actual progress."</p>
+                <div className="text-sm text-gray-600">David H. • Seattle, WA</div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <p className="text-center text-[#8888a0] mt-10 text-sm">
-            Setup takes under 15 minutes. No data migration, no implementation fees, no long-term contracts.
-          </p>
-        </div>
-      </section>
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="border-2 border-[#FF9F43] rounded-2xl p-8 bg-orange-50">
+              <Shield className="w-16 h-16 text-[#FF9F43] mx-auto mb-6" />
+              <h2 className="text-2xl font-bold mb-4">Our 14-day guarantee</h2>
+              <p className="text-lg text-gray-700 mb-6">
+                Try CalmKids Academy completely free for 14 days. If your child doesn't show measurable reading improvement, or if you're not thrilled with the calm, ad-free experience, cancel with one tap directly through Google Play. No phone calls, no hoops, no hard feelings.
+              </p>
+              <p className="text-sm text-gray-600">
+                Your data never leaves your device. No subscriptions unless you love it.
+              </p>
+            </div>
+          </div>
+        </section>
 
-      {/* Features Section — GEO Keyword-Rich Headings */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#12121a]/50">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-4 text-center">
-            Construction Financial Management Features
-          </h2>
-          <p className="text-center text-[#b0b0c8] mb-12 max-w-2xl mx-auto">
-            Every feature is purpose-built for how construction companies actually operate — project-based accounting, progress billing, retainage, and percentage-of-completion reporting.
-          </p>
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">Simple, honest pricing</h2>
+            <p className="text-center text-gray-600 mb-12">No hidden fees. No confusing tiers. Cancel anytime.</p>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold mb-2">Free Trial</h3>
+                <div className="text-3xl font-bold mb-4">$0<span className="text-sm text-gray-500">/14 days</span></div>
+                <ul className="space-y-2 text-sm text-gray-600 mb-6">
+                  <li>• Full app access</li>
+                  <li>• All stories & games</li>
+                  <li>• Parent dashboard</li>
+                  <li>• No credit card needed</li>
+                </ul>
+                <button onClick={handleInstallClick} className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">Start Free</button>
+              </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Real-Time Financial Dashboard',
-                desc: 'Auto-syncs with QuickBooks Online every hour. See revenue, expenses, net cash, AR/AP, and WIP across all active jobs in a single view.',
-                icon: Zap,
-              },
-              {
-                title: 'Job Costing & WIP Tracking',
-                desc: 'Per-job profit & loss with budget vs. actual spend. Automated WIP schedules show over-billing and under-billing by job — critical for construction percentage-of-completion accounting.',
-                icon: Eye,
-              },
-              {
-                title: 'Cash Flow Forecasting',
-                desc: 'See 30, 60, and 90 days ahead based on scheduled draws, open invoices, and committed AP. Plan payroll, equipment purchases, and sub payments with confidence.',
-                icon: TrendingUp,
-              },
-              {
-                title: 'AI-Powered CFO Analysis',
-                desc: 'Monthly narrative reports that explain your financial data in plain English — flagging margin erosion, cash crunches, and growth opportunities before they become problems.',
-                icon: Brain,
-              },
-              {
-                title: '7+ Construction Tool Integrations',
-                desc: 'Connect Procore, Buildertrend, ServiceTitan, Salesforce, HubSpot, JobNimbus, and CoConstruct. Field data merges with accounting data for total financial visibility.',
-                icon: Plug,
-              },
-              {
-                title: 'AR/AP Aging & Retainage Tracking',
-                desc: 'See exactly who owes you, who you owe, and how much retainage is outstanding by job. Color-coded aging buckets (current, 30, 60, 90+ days) highlight collection risks.',
-                icon: Shield,
-              },
-            ].map((feature, idx) => {
-              const IconComponent = feature.icon;
-              return (
-                <div
-                  key={idx}
-                  className="bg-gradient-to-br from-[#12121a] to-[#0a0a0f] border border-[#1e1e2e] rounded-lg p-5 sm:p-8 hover:border-[#6366f1]/50 transition"
-                >
-                  <div className="bg-[#6366f1]/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <IconComponent size={24} className="text-[#6366f1]" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#e8e8f0] mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-[#b0b0c8]">{feature.desc}</p>
+              <div className="bg-white p-6 rounded-xl border-2 border-[#FF9F43] relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-[#FF9F43] text-white px-3 py-1 rounded-full text-xs font-medium">MOST POPULAR</span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Integrations Banner */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y border-[#1e1e2e]">
-        <div className="max-w-5xl mx-auto text-center">
-          <p className="text-sm text-[#8888a0] uppercase tracking-wider mb-6">
-            Connects with the construction tools you already use
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-8 md:gap-12">
-            {[
-              { name: 'QuickBooks', color: '#2CA01C' },
-              { name: 'Procore', color: '#F47E20' },
-              { name: 'Buildertrend', color: '#00B4D8' },
-              { name: 'ServiceTitan', color: '#002B5C' },
-              { name: 'Salesforce', color: '#00A1E0' },
-              { name: 'HubSpot', color: '#FF7A59' },
-              { name: 'JobNimbus', color: '#4CAF50' },
-            ].map((tool) => (
-              <div
-                key={tool.name}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12121a] border border-[#1e1e2e] hover:border-[#6366f1]/30 transition"
-              >
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: tool.color }}
-                />
-                <span className="text-sm font-medium text-[#8888a0]">{tool.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* BuilderCFO vs Hiring a Full-Time CFO — GEO Comparison Block */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-12 text-center">
-            BuilderCFO vs. Hiring a Full-Time CFO
-          </h2>
-
-          <div className="bg-[#12121a] border border-[#1e1e2e] rounded-xl overflow-hidden">
-            <div className="grid grid-cols-3 text-center">
-              <div className="p-2 sm:p-4 border-b border-r border-[#1e1e2e]">
-                <span className="text-xs sm:text-sm font-semibold text-[#8888a0]"></span>
-              </div>
-              <div className="p-2 sm:p-4 border-b border-r border-[#1e1e2e] bg-[#6366f1]/5">
-                <span className="text-xs sm:text-sm font-bold text-[#6366f1]">BuilderCFO</span>
-              </div>
-              <div className="p-2 sm:p-4 border-b border-[#1e1e2e]">
-                <span className="text-xs sm:text-sm font-semibold text-[#8888a0]">Full-Time CFO</span>
-              </div>
-            </div>
-            {[
-              { label: 'Annual Cost', builder: '$3,588–$8,388', cfo: '$120,000–$200,000+' },
-              { label: 'Setup Time', builder: '15 minutes', cfo: '2–3 months' },
-              { label: 'Real-Time Data', builder: 'Yes — auto-synced', cfo: 'Monthly reports' },
-              { label: 'Construction Specific', builder: 'Job costing, WIP, retainage', cfo: 'Depends on hire' },
-              { label: 'Integrations', builder: '7+ tools built in', cfo: 'Manual data entry' },
-              { label: 'AI Analysis', builder: 'Included', cfo: 'Not available' },
-              { label: 'Contract Required', builder: 'No — cancel anytime', cfo: 'Employment contract' },
-            ].map((row, idx) => (
-              <div key={idx} className="grid grid-cols-3 text-center">
-                <div className="p-2 sm:p-3 border-b border-r border-[#1e1e2e] text-xs sm:text-sm text-[#b0b0c8] text-left pl-3 sm:pl-6">{row.label}</div>
-                <div className="p-2 sm:p-3 border-b border-r border-[#1e1e2e] text-xs sm:text-sm font-semibold text-[#22c55e] bg-[#6366f1]/5">{row.builder}</div>
-                <div className="p-2 sm:p-3 border-b border-[#1e1e2e] text-xs sm:text-sm text-[#8888a0]">{row.cfo}</div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-[#8888a0] mt-6 text-sm">
-            BuilderCFO gives you CFO-level financial visibility at a fraction of the cost. For contractors who need hands-on advisory,{' '}
-            <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">
-              Salisbury Bookkeeping
-            </a>{' '}
-            offers fractional controller services that pair perfectly with the dashboard.
-          </p>
-        </div>
-      </section>
-
-      {/* Social Proof Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#12121a]/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-4 text-center">
-            Trusted by Contractors Nationwide
-          </h2>
-          <p className="text-center text-[#b0b0c8] mb-12">
-            General contractors, custom home builders, remodelers, and specialty trades use BuilderCFO to manage their finances.
-          </p>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote:
-                  '"We were bleeding money on two jobs and had no idea. This dashboard caught it in the first week."',
-                author: 'Mike J.',
-                title: 'GC Owner — Austin, TX',
-              },
-              {
-                quote:
-                  '"Our bookkeeper used to spend 3 weeks on month-end close. Now it takes 2 days. The WIP tracking alone is worth it."',
-                author: 'Sarah M.',
-                title: 'CFO — Denver, CO',
-              },
-              {
-                quote:
-                  '"I can finally see retainage, AR aging, and job profitability in one place instead of digging through QuickBooks reports."',
-                author: 'David C.',
-                title: 'Custom Home Builder — Nashville, TN',
-              },
-              {
-                quote:
-                  '"The cash flow forecast saved us from a payroll crunch. We moved a draw request up two weeks because of what we saw."',
-                author: 'Rachel T.',
-                title: 'Remodeling Company Owner — Phoenix, AZ',
-              },
-              {
-                quote:
-                  '"My accountant called me after seeing the dashboard and said, \'Why didn\'t we have this years ago?\'"',
-                author: 'Brandon L.',
-                title: 'Commercial GC — Atlanta, GA',
-              },
-              {
-                quote:
-                  '"We went from guessing on bids to knowing exactly what our margins are on every job type. Game changer."',
-                author: 'Tony R.',
-                title: 'Framing Contractor — Salt Lake City, UT',
-              },
-            ].map((testimonial, idx) => (
-              <div key={idx} className="bg-[#0a0a0f] border border-[#1e1e2e] rounded-lg p-6">
-                <p className="text-[#b0b0c8] italic mb-4">{testimonial.quote}</p>
-                <div>
-                  <p className="text-[#e8e8f0] font-semibold">{testimonial.author}</p>
-                  <p className="text-[#8888a0] text-sm">{testimonial.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" id="pricing">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 text-center">
-            Construction Dashboard Pricing Plans
-          </h2>
-          <p className="text-center text-[#b0b0c8] mb-12 text-lg">
-            No credit card required. 14 days free on every plan.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Starter Tier */}
-            <div className="bg-[#12121a] border border-[#2a2a3d] rounded-xl p-8 flex flex-col">
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Starter
-              </h3>
-              <p className="text-[#b0b0c8] mb-6">For solo contractors and small crews getting financial visibility</p>
-              <div className="mb-6">
-                <span className="text-4xl sm:text-5xl font-bold text-white">$199</span>
-                <span className="text-[#b0b0c8] ml-2">/month</span>
+                <h3 className="text-lg font-semibold mb-2">Standard</h3>
+                <div className="text-3xl font-bold mb-4">$4.99<span className="text-sm text-gray-500">/month</span></div>
+                <ul className="space-y-2 text-sm text-gray-600 mb-6">
+                  <li>• Everything in trial</li>
+                  <li>• Unlimited access</li>
+                  <li>• Monthly progress reports</li>
+                  <li>• 1-tap cancellation</li>
+                </ul>
+                <button onClick={handleInstallClick} className="w-full bg-[#FF9F43] text-white py-3 rounded-lg font-medium hover:bg-orange-500 transition-colors">Subscribe</button>
               </div>
 
-              <ul className="space-y-3 mb-8 flex-1">
-                {[
-                  'Real-time financial dashboard',
-                  'Job costing & WIP tracking',
-                  'Cash flow forecasting (30/60/90 day)',
-                  'QuickBooks Online sync',
-                  'Monthly AI CFO brief',
-                  'Email support',
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <Check size={18} className="text-[#6366f1] flex-shrink-0" />
-                    <span className="text-[#d0d0e0]">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/signup?plan=basic"
-                className="w-full px-4 py-3 rounded-lg font-semibold text-white bg-[#2a2a3d] hover:bg-[#3a3a4d] transition text-center block"
-              >
-                Start Free Trial
-              </Link>
-              <Link href="#schedule" className="block text-center text-sm text-[#6366f1] hover:text-[#818cf8] mt-2">
-                or Book a Demo →
-              </Link>
-            </div>
-
-            {/* Professional Tier */}
-            <div className="bg-gradient-to-br from-[#6366f1]/10 to-transparent border-2 border-[#6366f1]/60 rounded-xl p-8 relative flex flex-col shadow-lg shadow-[#6366f1]/10">
-              <div className="absolute -top-3 left-6 bg-[#6366f1] text-white text-xs font-bold px-4 py-1 rounded-full tracking-wide">
-                MOST POPULAR
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold mb-2">Family</h3>
+                <div className="text-3xl font-bold mb-4">$9.99<span className="text-sm text-gray-500">/month</span></div>
+                <ul className="space-y-2 text-sm text-gray-600 mb-6">
+                  <li>• Up to 4 children</li>
+                  <li>• Individual progress tracking</li>
+                  <li>• Sibling achievement sharing</li>
+                  <li>• Priority support</li>
+                </ul>
+                <button onClick={handleInstallClick} className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">Choose Family</button>
               </div>
 
-              <h3 className="text-2xl font-bold text-white mb-2">Professional</h3>
-              <p className="text-[#b0b0c8] mb-6">For growing construction companies with $1M–$10M revenue</p>
-              <div className="mb-6">
-                <span className="text-4xl sm:text-5xl font-bold text-white">$399</span>
-                <span className="text-[#b0b0c8] ml-2">/month</span>
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-6 rounded-xl text-white">
+                <h3 className="text-lg font-semibold mb-2">Founder's Concierge</h3>
+                <div className="text-3xl font-bold mb-4">$499<span className="text-sm opacity-80">/setup + $49/mo</span></div>
+                <ul className="space-y-2 text-sm opacity-90 mb-6">
+                  <li>• 1:1 onboarding call</li>
+                  <li>• Custom learning plan</li>
+                  <li>• Direct founder access</li>
+                  <li>• Roadmap influence</li>
+                  <li>• White-glove setup</li>
+                </ul>
+                <button onClick={handleInstallClick} className="w-full bg-white text-purple-700 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">Get VIP Access</button>
               </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {[
-                  'Everything in Starter',
-                  'Buildertrend + HubSpot + JobNimbus integrations',
-                  'Sales pipeline dashboard',
-                  'AI-powered CFO advisor',
-                  'AR/AP aging reports by job',
-                  'Priority support',
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <Check size={18} className="text-[#6366f1] flex-shrink-0" />
-                    <span className="text-[#d0d0e0]">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/signup?plan=pro"
-                className="w-full px-4 py-3 rounded-lg font-semibold text-white bg-[#6366f1] hover:bg-[#5558d9] transition text-center block"
-              >
-                Start Free Trial
-              </Link>
-              <Link href="#schedule" className="block text-center text-sm text-[#6366f1] hover:text-[#818cf8] mt-2">
-                or Book a Demo →
-              </Link>
-            </div>
-
-            {/* Enterprise Tier */}
-            <div className="bg-[#12121a] border border-[#2a2a3d] rounded-xl p-8 flex flex-col">
-              <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
-              <p className="text-[#b0b0c8] mb-6">For scaling operations with $10M+ revenue and multiple project managers</p>
-              <div className="mb-6">
-                <span className="text-4xl sm:text-5xl font-bold text-white">$599</span>
-                <span className="text-[#b0b0c8] ml-2">/month</span>
-              </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {[
-                  'Everything in Professional',
-                  'Procore + Salesforce + ServiceTitan integrations',
-                  'All 7+ integrations included',
-                  'Crew utilization tracking',
-                  'Quarterly strategy call with Salisbury Bookkeeping',
-                  'Dedicated account manager',
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <Check size={18} className="text-[#6366f1] flex-shrink-0" />
-                    <span className="text-[#d0d0e0]">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/signup?plan=enterprise"
-                className="w-full px-4 py-3 rounded-lg font-semibold text-white bg-[#2a2a3d] hover:bg-[#3a3a4d] transition text-center block"
-              >
-                Start Free Trial
-              </Link>
-              <Link href="#schedule" className="block text-center text-sm text-[#6366f1] hover:text-[#818cf8] mt-2">
-                or Book a Demo →
-              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FAQ Section — GEO Optimized with Question-Based H3s */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#12121a]/50" id="faq">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-12 text-center">
-            Frequently Asked Questions About BuilderCFO
-          </h2>
+        <section className="py-16 px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Frequently asked questions</h2>
+            
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Why is CalmKids Academy different from ABCmouse?</h3>
+                <p className="text-gray-600">We focus on calm, low-stimulation learning without distracting ticket economies or virtual shopping. Plus, you can cancel with 1 tap directly in the app through Google Play, no phone calls required.</p>
+              </div>
 
-          <div className="space-y-6 sm:space-y-8">
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">What is BuilderCFO and who is it for?</h3>
-              <p className="text-[#b0b0c8]">
-                BuilderCFO is a real-time financial dashboard built specifically for construction contractors, custom home builders, and remodelers. It connects to QuickBooks Online and field management tools like Procore, Buildertrend, and ServiceTitan to provide instant visibility into job costing, WIP schedules, cash flow forecasts, and AR/AP aging. It is designed for construction companies with $500K–$50M in annual revenue who need CFO-level financial insight without the CFO-level salary.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Will this work on my child's cheap Android tablet?</h3>
+                <p className="text-gray-600">Yes! We built CalmKids Academy specifically to run lightning-fast on budget Android tablets like Amazon Fire and basic Samsung devices. It loads in under 2 seconds and never freezes.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">How does BuilderCFO connect to QuickBooks Online?</h3>
-              <p className="text-[#b0b0c8]">
-                BuilderCFO uses OAuth 2.0 to securely connect to your QuickBooks Online account. The connection is read-only — BuilderCFO never modifies your books. Your financial data is encrypted in transit and at rest using industry-standard AES-256 encryption. Setup takes under 2 minutes.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Is my child's data private and secure?</h3>
+                <p className="text-gray-600">Absolutely. All learning progress stays on your device. We don't collect, track, or share any personal information. Your child's educational journey remains completely private.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">What is WIP tracking and why does it matter for contractors?</h3>
-              <p className="text-[#b0b0c8]">
-                WIP (Work in Progress) tracking compares the percentage of work completed on a job against the percentage billed. If you&apos;ve completed 60% of a job but billed 80%, you&apos;re over-billed by 20% — which means you may owe money back or face cash flow problems when the job finishes. BuilderCFO automates WIP schedule calculations using QuickBooks data and field management progress reports, giving you accurate over/under billing figures for every active job.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">What if my child doesn't like it?</h3>
+                <p className="text-gray-600">Try it free for 14 days with no credit card required. If it's not a perfect fit, cancel with one tap through Google Play. No customer service calls, no retention tactics.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">How much does BuilderCFO cost compared to a full-time CFO?</h3>
-              <p className="text-[#b0b0c8]">
-                BuilderCFO starts at $199/month (Starter), $399/month (Professional), or $599/month (Enterprise). A full-time construction CFO typically costs $120,000–$200,000+ per year in salary and benefits. BuilderCFO provides real-time dashboards, automated WIP, and AI analysis for $2,388–$7,188 per year — roughly 2–5% the cost of a dedicated hire. Every plan includes a 14-day free trial.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">How is this better than free apps like PBS Kids?</h3>
+                <p className="text-gray-600">While PBS Kids is great, it lacks structured progression tracking and can have inappropriate ads. CalmKids Academy provides a curated, ad-free learning path with detailed parent insights into skill development.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">Who built BuilderCFO?</h3>
-              <p className="text-[#b0b0c8]">
-                BuilderCFO was built by{' '}
-                <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">
-                  Salisbury Bookkeeping
-                </a>
-                , a fractional controller and construction bookkeeping firm that works with custom home builders, general contractors, and remodelers nationwide. The dashboard was created from real client needs — the same WIP schedules, job costing reports, and cash flow forecasts that Salisbury&apos;s controllers build manually for clients, now automated and available in real time.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Will my child have screen time tantrums?</h3>
+                <p className="text-gray-600">Our Montessori-inspired, low-stimulation design prevents dopamine spikes and crashes. Most parents report their children willingly stop after their 15-minute session ends.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">Is my financial data secure?</h3>
-              <p className="text-[#b0b0c8]">
-                Yes. BuilderCFO uses Supabase for secure database hosting with row-level security policies, and Stripe for PCI-compliant payment processing. All data is encrypted in transit (TLS 1.3) and at rest (AES-256). The QuickBooks connection is read-only — BuilderCFO cannot create, modify, or delete any data in your accounting system.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Can I track my child's actual learning progress?</h3>
+                <p className="text-gray-600">Yes! The parent dashboard shows exactly which phonics sounds, sight words, and math concepts your child mastered each day, with detailed progress reports you can't get from other apps.</p>
+              </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#e8e8f0] mb-2">Can I cancel my BuilderCFO subscription at any time?</h3>
-              <p className="text-[#b0b0c8]">
-                Yes. There are no long-term contracts, no cancellation fees, and no setup fees. You can cancel your subscription at any time and retain access through the end of your current billing cycle. Every plan starts with a 14-day free trial — no credit card required during the trial. You&apos;ll only be asked for payment details when you decide to continue after 14 days.
-              </p>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">What ages is this appropriate for?</h3>
+                <p className="text-gray-600">CalmKids Academy is designed for children aged 2-8, with adaptive content that grows with your child from basic letter recognition through 3rd-grade reading comprehension and math skills.</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#6366f1]/5 via-transparent to-[#a78bfa]/5 pointer-events-none" />
-
-        <div className="max-w-3xl mx-auto text-center relative">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e8e8f0] mb-4">
-            Ready to See Where Every Dollar Goes on Every Job?
-          </h2>
-          <p className="text-lg text-[#b0b0c8] mb-8">
-            Join contractors nationwide who use BuilderCFO to track job costs, forecast cash flow, and make smarter financial decisions — starting with a free 14-day trial.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded font-semibold text-white bg-[#6366f1] hover:bg-[#5558d9] transition"
+        <section className="py-16 px-4 bg-[#FF9F43]">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Give your child the reading advantage they deserve
+            </h2>
+            <p className="text-xl text-orange-100 mb-8">
+              Join 10,000+ parents who switched to calm, effective screen time
+            </p>
+            
+            <button 
+              onClick={handleInstallClick}
+              className="w-full max-w-sm bg-white text-[#FF9F43] py-4 px-8 rounded-xl font-bold text-lg hover:bg-gray-50 transition-colors mx-auto block mb-4"
             >
-              Start Free — No Card Required <ChevronRight size={18} />
-            </Link>
-            <Link
-              href="#schedule"
-              className="inline-flex items-center gap-2 px-8 py-3 rounded font-semibold text-[#6366f1] border border-[#6366f1] hover:bg-[#6366f1]/10 transition"
+              Start 14-Day Free Trial
+            </button>
+            
+            <button 
+              onClick={() => window.open('https://calmkidsacademy.com/web', '_blank')}
+              className="text-orange-100 hover:text-white transition-colors underline"
             >
-              Book a Demo →
-            </Link>
+              Try web version first
+            </button>
           </div>
-          <p className="text-sm text-[#8888a0] mt-4">
-            No credit card required. Cancel anytime. Built by{' '}
-            <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">
-              Salisbury Bookkeeping
-            </a>.
-          </p>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-[#12121a] border-t border-[#1e1e2e] py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div>
-              <h4 className="text-sm font-semibold text-[#8888a0] mb-4 uppercase">
-                Product
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#pricing" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#faq" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
+      <footer className="bg-gray-900 text-gray-300 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-[#FF9F43] rounded-lg flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold">CalmKids Academy</span>
             </div>
-            <div>
-              <h4 className="text-sm font-semibold text-[#8888a0] mb-4 uppercase">
-                Company
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Salisbury Bookkeeping
-                  </a>
-                </li>
-                <li>
-                  <a href="https://salisburybookkeeping.com/about" target="_blank" rel="noopener noreferrer" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    About Us
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-[#8888a0] mb-4 uppercase">
-                Legal
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Terms of Service
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-[#8888a0] mb-4 uppercase">
-                Contact
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="mailto:support@topbuildercfo.com"
-                    className="text-[#e8e8f0] hover:text-[#6366f1]"
-                  >
-                    support@topbuildercfo.com
-                  </a>
-                </li>
-                <li>
-                  <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#e8e8f0] hover:text-[#6366f1]">
-                    Salisbury Bookkeeping
-                  </a>
-                </li>
-              </ul>
+            
+            <div className="flex gap-6 text-sm">
+              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
             </div>
           </div>
-
-          <div className="border-t border-[#1e1e2e] pt-8 flex flex-col md:flex-row items-center justify-between">
-            <div className="text-sm text-[#8888a0]">
-              © 2026 BuilderCFO. All rights reserved.
-            </div>
-            <div className="text-sm text-[#8888a0] mt-4 md:mt-0">
-              Built by <a href="https://salisburybookkeeping.com" target="_blank" rel="noopener noreferrer" className="text-[#6366f1] hover:text-[#818cf8] transition">Salisbury Bookkeeping</a> — Fractional Controllers for Construction Companies
-            </div>
+          
+          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
+            <p>&copy; 2024 CalmKids Academy. Powered by Salisbury Bookkeeping.</p>
           </div>
         </div>
       </footer>
 
-      {/* Sticky Mobile CTA Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#12121a]/95 backdrop-blur border-t border-[#1e1e2e] p-3 flex items-center justify-between gap-3 z-50 sm:hidden">
-        <div className="text-xs text-[#b0b0c8] leading-tight">
-          <span className="font-semibold text-[#e8e8f0]">14 days free</span> — no card needed
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <Link
-            href="/demo"
-            className="px-3 py-2 rounded text-xs font-semibold text-[#6366f1] border border-[#6366f1] hover:bg-[#6366f1]/10 transition"
+      {showBottomBar && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-t border-gray-200 p-4 md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <button 
+            onClick={handleInstallClick}
+            className="w-full bg-[#FF9F43] text-white py-3 px-6 rounded-xl font-semibold hover:bg-orange-500 transition-colors flex items-center justify-center gap-2"
           >
-            Demo
-          </Link>
-          <Link
-            href="/signup"
-            className="px-3 py-2 rounded text-xs font-semibold text-white bg-[#6366f1] hover:bg-[#5558d9] transition"
-          >
-            Start Free
-          </Link>
+            <Download className="w-5 h-5" />
+            Install CalmKids Academy
+          </button>
         </div>
-      </div>
+      )}
+
+      {showModal && (
+        <dialog open className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm md:max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold">Get CalmKids Academy</h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+              <button 
+                onClick={() => setModalTab("install")}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${modalTab === "install" ? "bg-white shadow-sm" : "text-gray-600"}`}
+              >
+                Install free
+              </button>
+              <button 
+                onClick={() => setModalTab("referral")}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${modalTab === "referral" ? "bg-white shadow-sm" : "text-gray-600"}`}
+              >
+                Refer 2 for 20% off
+              </button>
+            </div>
+
+            {submitSuccess && (
+              <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center">
+                {submitSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleModalSubmit} className="space-y-4">
+              {modalTab === "install" ? (
+                <>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Your email"
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#FF9F43] focus:border-transparent"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#FF9F43] text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-500 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Sending..." : "Send me the download link"}
+                  </button>
+                  <p className="text-xs text-gray-500 text-center">No card. Unsubscribe any time.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-4">Share with 2 friends and all three of you get 20% off — instantly.</p>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Your email"
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#FF9F43] focus:border-transparent"
+                  />
+                  <input 
+                    type="email" 
+                    name="friend_email_1" 
+                    placeholder="Friend's email"
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#FF9F43] focus:border-transparent"
+                  />
+                  <input 
+                    type="email" 
+                    name="friend_email_2" 
+                    placeholder="Another friend's email"
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#FF9F43] focus:border-transparent"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#FF9F43] text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-500 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Processing..." : "Unlock my 20% off code"}
+                  </button>
+                </>
+              )}
+
+              {submitError && (
+                <p className="text-sm text-red-600 text-center">{submitError}</p>
+              )}
+            </form>
+          </div>
+        </dialog>
+      )}
     </div>
-  );
+  )
 }
