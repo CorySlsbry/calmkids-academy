@@ -1,0 +1,46 @@
+{
+  "packageId": "app.vercel.calmkids_academy.twa",
+  "host": "calmkids-academy.vercel.app",
+  "name": "CalmKids Academy",
+  "launcherName": "CalmKids Aca",
+  "display": "standalone",
+  "themeColor": "#FF9F43",
+  "themeColorDark": "#0f172a",
+  "navigationColor": "#FF9F43",
+  "navigationColorDark": "#0f172a",
+  "navigationDividerColor": "#FF9F43",
+  "navigationDividerColorDark": "#0f172a",
+  "backgroundColor": "#0f172a",
+  "enableNotifications": true,
+  "startUrl": "/?source=twa",
+  "iconUrl": "https://calmkids-academy.vercel.app/icon-512.svg",
+  "maskableIconUrl": "https://calmkids-academy.vercel.app/icon-maskable.svg",
+  "monochromeIconUrl": "https://calmkids-academy.vercel.app/icon-512.svg",
+  "shortcuts": [],
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shareTarget": null,
+  "orientation": "portrait",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://calmkids-academy.vercel.app/",
+  "minSdkVersion": 21,
+  "description": "Ad-free, calm, and actually educational screen time for your kids."
+}
