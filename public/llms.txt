@@ -1,0 +1,33 @@
+# CalmKids Academy
+
+> CalmKids Academy is ad-free, COPPA-compliant educational screen time for children ages 2–8. Daily 15-minute sessions built around mindfulness, phonics, and social-emotional learning (SEL) — with zero ads, zero tracking, and zero dark patterns.
+
+CalmKids Academy is a web + mobile PWA that parents hand to young children as a guilt-free alternative to YouTube Kids and TikTok. The app runs structured 15-minute sessions covering early literacy (phonics, sight words), math readiness, mindfulness/breathing, and social-emotional learning (SEL) — all narrated by calm, age-appropriate voices. It is COPPA-compliant (Children's Online Privacy Protection Act), collects zero behavioral data on children, and serves no advertising of any kind.
+
+- **Platform:** Web, Android, iOS (PWA)
+- **Category:** Kids education / screen-time alternative
+- **Age range:** 2–8 years old
+- **Pricing:** $4.99/month, $79/year (saves ~33%), or $199 lifetime (one-time). Refer-2 program: refer 2 friends who subscribe and get 20% off forever.
+- **Core features:** 15-minute daily sessions, phonics and early literacy, math readiness, mindfulness and breathing, social-emotional learning (SEL), parental dashboard, screen-time limits, COPPA-compliant, zero ads, zero data tracking of children.
+- **Differentiator:** Unlike YouTube Kids (ad-supported, algorithmic) or ABCmouse (large open-ended catalog), CalmKids Academy enforces a 15-minute daily structured session and refuses to collect any behavioral data on children.
+
+## Pricing
+
+- **Monthly — $4.99/mo:** All content, one child profile, parent dashboard.
+- **Annual — $79/yr:** Saves ~33% vs monthly. Up to 3 child profiles.
+- **Lifetime — $199 one-time:** Pay once, keep forever. Up to 5 child profiles.
+- **Refer-2-for-20% program:** Refer 2 friends who start a paid subscription and receive 20% off your plan forever. Applied via coupon REFER2_20OFF.
+
+## Key URLs
+
+- [Homepage](https://calmkids-academy.vercel.app): Parent-facing overview and pricing
+- [Pricing](https://calmkids-academy.vercel.app/pricing): Plan comparison
+
+## FAQ
+
+- **What ages is CalmKids Academy for?** Children ages 2 through 8. Content is tiered by developmental stage.
+- **Is it really ad-free?** Yes. No banner ads, no video pre-rolls, no sponsored content, no affiliate links, no upsells shown to the child. The parent dashboard is the only place subscription info appears.
+- **Is CalmKids Academy COPPA-compliant?** Yes. We collect no personally identifiable information on children, no behavioral tracking, no device fingerprinting, no third-party analytics on child-facing screens.
+- **How long are the daily sessions?** 15 minutes by default. The session auto-ends when the timer runs out. Parents can extend in 5-minute increments from the dashboard.
+- **What subjects are covered?** Phonics, sight-word recognition, early math, mindfulness/breathing exercises, and social-emotional learning (SEL) — recognizing emotions, self-regulation, kindness.
+- **Can I get a refund?** Yes — full refund within 14 days of first charge on monthly and annual plans. Lifetime plan has a 30-day refund window.
