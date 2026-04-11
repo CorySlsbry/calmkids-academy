@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }],
   },
+  // Note: openGraph.images and twitter.images are INTENTIONALLY omitted
+  // so Next.js auto-discovers src/app/opengraph-image.tsx and serves the
+  // dynamically-generated, branded OG image at /opengraph-image.
   openGraph: {
     type: 'website',
     siteName: 'CalmKids Academy',
@@ -49,14 +52,12 @@ export const metadata: Metadata = {
     description:
       'Ad-free, COPPA-compliant educational screen time. Phonics, mindfulness, and SEL in 15-minute daily sessions.',
     url: APP_URL,
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'CalmKids Academy' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CalmKids Academy — Ad-Free Educational Screen Time for Ages 2–8',
     description:
       'COPPA-compliant, zero ads, zero tracking. From $4.99/mo or $199 lifetime.',
-    images: ['/og-image.png'],
   },
 };
 
