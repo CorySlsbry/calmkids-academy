@@ -27,8 +27,35 @@ export const dynamic = "force-dynamic"
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const schema = process.env.NEXT_PUBLIC_APP_SCHEMA || "calmkids"
   if (!url || !key) throw new Error("Supabase admin credentials not configured")
-  return createClient(url, key)
+  return createClient(url, key, {
+    db: { schema },
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+}
+
+/**
+ * Stripe v20+ moved `current_period_end` from Subscription onto each
+ * SubscriptionItem. Fall back to the legacy top-level field for older
+ * webhook payloads still in flight from previous API versions.
+ */
+function getPeriodEnd(subscription: Stripe.Subscription): number {
+  const item = subscription.items?.data?.[0] as any
+  return (item?.current_period_end ?? (subscription as any).current_period_end ?? 0) as number
+}
+
+/**
+ * Stripe v20+ moved `Invoice.subscription` to
+ * `Invoice.parent.subscription_details.subscription`. Read the new
+ * location first, fall back to the legacy top-level field.
+ */
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const fromParent = (invoice as any).parent?.subscription_details?.subscription
+  const legacy = (invoice as any).subscription
+  const value = fromParent ?? legacy
+  if (!value) return null
+  return typeof value === "string" ? value : value.id ?? null
 }
 
 /**
@@ -57,6 +84,24 @@ async function getOrCreateUser(
       return {}
     }
 
+    const newUserId = created.user.id
+
+    // Explicitly create profile row in calmkids.profiles (was previously a trigger)
+    const { error: profileErr } = await (supabase as any)
+      .from("profiles")
+      .insert({ id: newUserId, email, full_name: fullName || null })
+    if (profileErr) {
+      console.error("[webhook] profile insert failed:", profileErr.message)
+    }
+
+    // Generate a referral code for the new user (best-effort)
+    const { error: refErr } = await (supabase as any).rpc("generate_referral_code", {
+      p_user_id: newUserId,
+    })
+    if (refErr) {
+      console.error("[webhook] referral code generation failed:", refErr.message)
+    }
+
     // Route the recovery link through /auth/callback → /reset-password so
     // the new user can pick their initial password.
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || ""}/auth/callback?next=/reset-password`
@@ -66,7 +111,7 @@ async function getOrCreateUser(
       options: { redirectTo },
     })
     return {
-      userId: created.user.id,
+      userId: newUserId,
       setupLink: linkData?.properties?.action_link || undefined,
     }
   } catch (err: any) {
@@ -200,7 +245,7 @@ export async function POST(req: NextRequest) {
           priceId:              item.price.id,
           status:               sub.status,
           planType:             getPlanType(price),
-          currentPeriodEnd:     new Date(sub.current_period_end * 1000),
+          currentPeriodEnd:     new Date(getPeriodEnd(sub) * 1000),
           userId:               sub.metadata?.user_id ?? null,
         })
         break
@@ -220,12 +265,13 @@ export async function POST(req: NextRequest) {
       // ── Payment failed ──────────────────────────────────────────────────
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice
-        if (invoice.subscription) {
+        const subId = getInvoiceSubscriptionId(invoice)
+        if (subId) {
           const supabase = getSupabaseAdmin()
           await supabase
             .from("subscriptions")
             .update({ status: "past_due", updated_at: new Date().toISOString() })
-            .eq("stripe_subscription_id", invoice.subscription as string)
+            .eq("stripe_subscription_id", subId)
         }
         break
       }

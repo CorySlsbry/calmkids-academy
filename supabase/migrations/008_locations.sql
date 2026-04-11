@@ -1,6 +1,6 @@
 -- ============================================================
 -- Locations table for multi-location support
--- Contractor CFO Dashboard — Migration 008
+-- CalmKids Academy — Migration 008
 -- ============================================================
 -- Backward compatible: all FKs referencing this table should
 -- be nullable so existing rows are unaffected.

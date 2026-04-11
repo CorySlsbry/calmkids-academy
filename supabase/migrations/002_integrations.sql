@@ -1,6 +1,6 @@
 -- ============================================================
 -- Integration tables for multi-source data
--- Contractor CFO Dashboard
+-- CalmKids Academy
 -- ============================================================
 
 -- Integration connections table

@@ -83,7 +83,59 @@ function welcomeEmailHtml(name: string, setupLink?: string): string {
 </html>`;
 }
 
+function passwordResetEmailHtml(resetLink: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#FFFDF8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+    <div style="text-align:center;margin-bottom:30px;">
+      <span style="color:#B45309;font-size:24px;font-weight:800;">CalmKids Academy</span>
+    </div>
+    <div style="background:#ffffff;border:1px solid #E5E7EB;border-radius:16px;padding:32px;">
+      <h1 style="color:#1F2937;font-size:22px;margin:0 0 16px;font-weight:800;">
+        Reset your CalmKids Academy password
+      </h1>
+      <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        We received a request to reset the password on your CalmKids Academy account.
+        Click the button below to choose a new one. This link is good for the next hour.
+      </p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${resetLink}"
+           style="display:inline-block;background:#B45309;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;">
+          Reset Password
+        </a>
+      </div>
+      <p style="color:#6B7280;font-size:13px;line-height:1.6;margin:20px 0 0;text-align:center;">
+        Didn&rsquo;t request this? You can safely ignore this email &mdash; your password won&rsquo;t change.
+      </p>
+    </div>
+    <p style="color:#9CA3AF;font-size:11px;text-align:center;margin-top:20px;">
+      CalmKids Academy &middot; published by Salisbury Bookkeeping LLC
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
 // ── Send Functions ────────────────────────────────────────
+
+export async function sendPasswordResetEmail(to: string, resetLink: string) {
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Reset your CalmKids Academy password',
+      html: passwordResetEmailHtml(resetLink),
+    });
+  } catch (err) {
+    console.error('[email] Failed to send password reset email:', err);
+  }
+}
 
 export async function sendWelcomeEmail(to: string, name: string = '', setupLink?: string) {
   try {

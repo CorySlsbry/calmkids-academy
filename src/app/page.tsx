@@ -378,15 +378,23 @@ export default function CalmKidsLandingPage() {
               <Link href="#faq"        className="hover:text-[#0F766E] transition-colors">FAQ</Link>
             </div>
 
-            {/* Desktop CTA */}
-            <button
-              onClick={() => handleCheckout("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY")}
-              disabled={checkoutLoading !== null}
-              className="hidden md:inline-flex items-center gap-2 bg-[#B45309] text-white font-bold px-5 py-2 rounded-lg hover:bg-[#92400E] transition-colors min-h-[44px] text-sm disabled:opacity-70"
-              aria-label="Start free trial of CalmKids Academy"
-            >
-              Start Free Trial
-            </button>
+            {/* Desktop CTAs */}
+            <div className="hidden md:flex items-center gap-3">
+              <Link
+                href="/login"
+                className="text-[#374151] hover:text-[#B45309] font-semibold text-sm transition-colors"
+              >
+                Sign In
+              </Link>
+              <button
+                onClick={() => handleCheckout("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY")}
+                disabled={checkoutLoading !== null}
+                className="inline-flex items-center gap-2 bg-[#B45309] text-white font-bold px-5 py-2 rounded-lg hover:bg-[#92400E] transition-colors min-h-[44px] text-sm disabled:opacity-70"
+                aria-label="Start free trial of CalmKids Academy"
+              >
+                Start Free Trial
+              </button>
+            </div>
 
             {/* Mobile hamburger */}
             <button
@@ -418,7 +426,7 @@ export default function CalmKidsLandingPage() {
                   {label}
                 </Link>
               ))}
-              <div className="px-4 pt-2">
+              <div className="px-4 pt-2 space-y-2">
                 <button
                   onClick={() => { setMobileNavOpen(false); handleCheckout("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY") }}
                   disabled={checkoutLoading !== null}
@@ -426,6 +434,13 @@ export default function CalmKidsLandingPage() {
                 >
                   Start Free Trial — 14 Days Free
                 </button>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="block w-full text-center border border-[#B45309] text-[#B45309] font-semibold py-3 px-4 rounded-xl min-h-[56px] hover:bg-[#FEF3C7] transition-colors text-base"
+                >
+                  Sign In
+                </Link>
               </div>
             </div>
           )}

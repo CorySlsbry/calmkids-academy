@@ -1,6 +1,6 @@
 -- ============================================================================
--- Contractor CFO Dashboard - Supabase Database Schema
--- Multi-tenant SaaS for contractor bookkeeping
+-- CalmKids Academy - Supabase Database Schema
+-- Mindfulness, literacy, and SEL for kids ages 2–8
 -- ============================================================================
 
 -- ============================================================================
