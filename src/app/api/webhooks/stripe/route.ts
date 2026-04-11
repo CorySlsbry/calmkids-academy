@@ -19,6 +19,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { stripe, getPlanType, PlanType } from "@/lib/stripe"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
+import { sendWelcomeEmail } from "@/lib/email"
+import { enrollInGhl } from "@/lib/ghl"
 
 export const dynamic = "force-dynamic"
 
@@ -27,6 +29,50 @@ function getSupabaseAdmin() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) throw new Error("Supabase admin credentials not configured")
   return createClient(url, key)
+}
+
+/**
+ * Get-or-create a Supabase auth user keyed by email. On creation, also
+ * generates a password-recovery link the user can click from their welcome
+ * email to set a password and log in for the first time.
+ */
+async function getOrCreateUser(
+  email: string,
+  fullName: string
+): Promise<{ userId?: string; setupLink?: string }> {
+  const supabase = getSupabaseAdmin()
+  try {
+    const { data: existing } = await (supabase.auth as any).admin.getUserByEmail(email)
+    if (existing?.user?.id) {
+      return { userId: existing.user.id }
+    }
+
+    const { data: created, error: createErr } = await (supabase.auth as any).admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: fullName || "" },
+    })
+    if (createErr || !created?.user?.id) {
+      console.error("[webhook] auth.createUser failed:", createErr?.message)
+      return {}
+    }
+
+    // Route the recovery link through /auth/callback → /reset-password so
+    // the new user can pick their initial password.
+    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || ""}/auth/callback?next=/reset-password`
+    const { data: linkData } = await (supabase.auth as any).admin.generateLink({
+      type: "recovery",
+      email,
+      options: { redirectTo },
+    })
+    return {
+      userId: created.user.id,
+      setupLink: linkData?.properties?.action_link || undefined,
+    }
+  } catch (err: any) {
+    console.error("[webhook] getOrCreateUser error:", err?.message)
+    return {}
+  }
 }
 
 async function upsertSubscription(params: {
@@ -79,10 +125,19 @@ export async function POST(req: NextRequest) {
       // ── Checkout completed ──────────────────────────────────────────────
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
-        if (session.mode === "subscription" && session.subscription) {
-          // Subscription checkout — handled fully by subscription.created event
-          break
+        const customerEmail =
+          session.customer_email || session.customer_details?.email || undefined
+        const customerName = session.customer_details?.name || ""
+
+        // Provision the auth user before writing the subscription
+        let userId: string | undefined
+        let setupLink: string | undefined
+        if (customerEmail) {
+          const result = await getOrCreateUser(customerEmail, customerName)
+          userId = result.userId
+          setupLink = result.setupLink
         }
+
         if (session.mode === "payment" && session.payment_intent) {
           // Lifetime one-time purchase
           const pi = await stripe.paymentIntents.retrieve(
@@ -90,20 +145,44 @@ export async function POST(req: NextRequest) {
             { expand: ["invoice.subscription"] }
           )
           if (pi.status === "succeeded") {
-            const priceId  = session.line_items
+            const priceId = session.line_items
               ? (await stripe.checkout.sessions.listLineItems(session.id)).data[0]?.price?.id ?? ""
               : ""
             await upsertSubscription({
               stripeCustomerId:     session.customer as string,
               stripeSubscriptionId: null,
               priceId,
-              status:              "active",
-              planType:            "lifetime",
-              currentPeriodEnd:    null,
-              userId:              session.metadata?.user_id ?? null,
+              status:               "active",
+              planType:             "lifetime",
+              currentPeriodEnd:     null,
+              userId:               userId ?? session.metadata?.user_id ?? null,
             })
           }
         }
+
+        // Welcome email + GHL enrollment (for both subscription and lifetime checkouts)
+        if (customerEmail) {
+          const [firstName, ...rest] = (customerName || "").split(" ")
+          const lastName = rest.join(" ") || undefined
+
+          sendWelcomeEmail(customerEmail, firstName || "", setupLink).catch((e) =>
+            console.error("[webhook] welcome email failed:", e?.message || e)
+          )
+
+          enrollInGhl({
+            email: customerEmail,
+            firstName: firstName || undefined,
+            lastName,
+            priceId: session.metadata?.priceId || undefined,
+            stripeCustomerId: session.customer as string,
+            metadata: {
+              schema: process.env.NEXT_PUBLIC_APP_SCHEMA || "calmkids",
+              checkoutSessionId: session.id,
+              refCode: (session.metadata as any)?.refCode || "",
+            },
+          }).catch((e) => console.error("[webhook] GHL enroll failed:", e?.message || e))
+        }
+
         break
       }
 

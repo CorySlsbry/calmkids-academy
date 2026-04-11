@@ -1,20 +1,28 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Leaf } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | BuilderCFO',
-  description: 'BuilderCFO terms of service — the agreement between you and Salisbury Bookkeeping LLC.',
+  title: 'Terms of Service | CalmKids Academy',
+  description:
+    'CalmKids Academy terms of service — the agreement between parents and Salisbury Bookkeeping LLC.',
 };
 
 export default function TermsOfServicePage() {
   return (
-    <div className="bg-[#0a0a0f] text-[#e8e8f0] min-h-screen">
-      <nav className="fixed top-0 w-full bg-[#0a0a0f]/80 backdrop-blur border-b border-[#1e1e2e] z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 sm:h-16">
-          <Link href="/" className="font-bold text-lg tracking-tight">
-            <span className="text-[#6366f1]">Builder</span><span className="text-[#e8e8f0]">CFO</span>
+    <div className="bg-[#FFFDF8] text-[#1F2937] min-h-screen">
+      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur border-b border-gray-200 z-50">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 sm:h-16 max-w-5xl mx-auto">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#B45309] rounded-lg flex items-center justify-center">
+              <Leaf className="w-4 h-4 text-white" aria-hidden="true" />
+            </div>
+            <span className="font-bold text-[#1F2937] text-sm">CalmKids Academy</span>
           </Link>
-          <Link href="/" className="text-sm text-[#8888a0] hover:text-[#e8e8f0] transition">
+          <Link
+            href="/"
+            className="text-sm text-[#0F766E] hover:underline font-medium transition"
+          >
             &larr; Back to Home
           </Link>
         </div>
@@ -22,62 +30,163 @@ export default function TermsOfServicePage() {
 
       <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
-          <p className="text-sm text-[#8888a0] mb-8">Last updated: April 3, 2026</p>
+          <h1 className="text-3xl font-black mb-2 text-[#1F2937]">Terms of Service</h1>
+          <p className="text-sm text-[#6B7280] mb-8">Last updated: April 10, 2026</p>
 
-          <div className="space-y-6 text-[#b0b0c8] text-sm leading-relaxed">
+          <div className="space-y-6 text-[#374151] text-sm leading-relaxed">
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">1. Acceptance of Terms</h2>
-              <p>By creating an account or using BuilderCFO, you agree to these Terms of Service. BuilderCFO is operated by Salisbury Bookkeeping LLC. If you do not agree to these terms, do not use the service.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">1. Acceptance</h2>
+              <p>
+                By creating a CalmKids Academy account or using the service on behalf of a
+                child in your care, you agree to these Terms of Service. CalmKids Academy
+                is operated by Salisbury Bookkeeping LLC. Accounts may only be created by a
+                parent or legal guardian aged 18 or over.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">2. Service Description</h2>
-              <p>BuilderCFO is a SaaS financial dashboard designed for construction contractors, home builders, and remodelers. It integrates with QuickBooks Online and field management tools to provide financial reporting, job costing, WIP tracking, cash flow forecasting, and AI-powered analysis. The service is provided &quot;as is&quot; and we make no guarantees about uninterrupted availability.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">
+                2. Parent Account and Parental Responsibility
+              </h2>
+              <p>
+                You confirm that you are the parent or legal guardian of every child whose
+                profile you create. You are responsible for supervising your child&apos;s
+                use of the app, selecting age-appropriate activities, and managing session
+                length. CalmKids Academy is a supplemental educational tool — not a
+                substitute for parental supervision, professional instruction, or
+                medical/psychological advice.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">3. Accounts and Access</h2>
-              <p>You are responsible for maintaining the security of your account credentials. Each account is for use by a single organization. You may not share account credentials with individuals outside your organization. We reserve the right to suspend accounts that violate these terms.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">3. Subscription & Billing</h2>
+              <p>
+                CalmKids Academy is offered as a monthly subscription ($4.99/mo), an annual
+                subscription ($79/yr), or a one-time lifetime purchase ($199). Monthly and
+                annual plans include a 14-day free trial. Subscriptions renew automatically
+                at the stated rate until canceled. You can cancel anytime through Google
+                Play (for subscriptions purchased via the parent web interface). All
+                payments are processed by Stripe on the parent-facing web interface — the
+                Android app does not use in-app billing.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">4. Billing and Subscriptions</h2>
-              <p>BuilderCFO is offered on a monthly subscription basis. All plans include a 14-day free trial. After your trial, you will be billed monthly at the rate for your selected plan. You may upgrade, downgrade, or cancel your subscription at any time through your account settings. Cancellations take effect at the end of the current billing period.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">4. 30-Day Money-Back Guarantee</h2>
+              <p>
+                If CalmKids Academy isn&apos;t a good fit for your family, email us within
+                30 days of your first paid charge for a full refund — no questions, no
+                exit survey. Applies to all plans including Lifetime.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">5. Money-Back Guarantee</h2>
-              <p>All plans come with a 30-day money-back guarantee. If you are not satisfied with the service within your first 30 days as a paying subscriber, contact us for a full refund.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">5. Acceptable Use</h2>
+              <p>
+                You agree not to: (a) share account credentials outside your household;
+                (b) attempt to reverse engineer, decompile, or scrape the service;
+                (c) use the service to harass or harm others;
+                (d) circumvent technical protections; or (e) use the service in any way
+                that violates applicable law. We reserve the right to suspend accounts
+                that violate these terms.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">6. Data and Integrations</h2>
-              <p>When you connect third-party services (QuickBooks Online, Procore, Buildertrend, etc.), you authorize BuilderCFO to access your data on those platforms in read-only mode. BuilderCFO does not modify data in your connected accounts. You retain ownership of all your data. See our Privacy Policy for details on data handling.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">6. Content</h2>
+              <p>
+                All curriculum, activities, animations, audio, illustrations, and written
+                content are created or licensed by us. There is no user-generated content
+                — children cannot post, upload, chat, or communicate with other users.
+                The app is a closed, one-way content experience designed for safety.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">7. AI Features Disclaimer</h2>
-              <p>BuilderCFO includes AI-powered financial analysis features. These features provide analysis and suggestions based on your data, but should not be considered professional financial, accounting, or legal advice. Always consult with a qualified professional for important financial decisions.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">7. Intellectual Property</h2>
+              <p>
+                CalmKids Academy, the CalmKids name and logo, all curriculum content, and
+                the parent dashboard are the exclusive property of Salisbury Bookkeeping
+                LLC. Your subscription grants you a limited, revocable, non-transferable
+                license to use the service for personal, non-commercial family use. You
+                may not redistribute, resell, or publicly perform any content from the app.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">8. Limitation of Liability</h2>
-              <p>BuilderCFO and Salisbury Bookkeeping LLC shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service. Our total liability for any claims related to the service is limited to the amount you have paid us in the 12 months preceding the claim.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">8. Termination</h2>
+              <p>
+                You may cancel your account at any time. We may suspend or terminate
+                accounts that violate these terms, fail payment, or request account
+                closure. On termination, access to the service ends immediately; refunds
+                for the current billing period are offered at our discretion or per the
+                30-day guarantee above.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">9. Changes to Terms</h2>
-              <p>We may update these terms from time to time. We will notify you of material changes via email. Continued use of the service after changes constitutes acceptance of the updated terms.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">9. Disclaimer</h2>
+              <p>
+                CalmKids Academy is provided on an &quot;as is&quot; and &quot;as
+                available&quot; basis. We make no warranties that the service will be
+                uninterrupted, error-free, or achieve any specific educational or
+                behavioral outcome. The activities are designed to support — not
+                replace — direct caregiver engagement, professional early-childhood
+                education, or medical care.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-[#e8e8f0] mb-2">10. Contact</h2>
-              <p>For questions about these terms, contact us at <a href="mailto:cory@salisburybookkeeping.com" className="text-[#6366f1] hover:text-[#818cf8] transition">cory@salisburybookkeeping.com</a>.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">
+                10. Limitation of Liability
+              </h2>
+              <p>
+                To the fullest extent permitted by law, Salisbury Bookkeeping LLC and
+                CalmKids Academy shall not be liable for indirect, incidental, special,
+                consequential, or punitive damages. Our total liability for any claims
+                related to the service is limited to the total amount you paid us in the
+                12 months preceding the claim.
+              </p>
             </section>
 
             <section>
-              <p className="text-[#8888a0]">BuilderCFO is a product of Salisbury Bookkeeping LLC.</p>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">11. Governing Law</h2>
+              <p>
+                These terms are governed by the laws of the State of Delaware, without
+                regard to conflict-of-law principles. Any dispute not resolved informally
+                shall be brought exclusively in the state or federal courts located in
+                Delaware.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">12. Changes</h2>
+              <p>
+                We may update these terms from time to time. We will email active parent
+                account holders at least 14 days before any material change takes effect.
+                Continued use of the service after the effective date constitutes
+                acceptance of the updated terms.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-[#1F2937] mb-2">13. Contact</h2>
+              <p>
+                Questions about these terms? Email{' '}
+                <a
+                  href="mailto:cory@salisburybookkeeping.com"
+                  className="text-[#0F766E] hover:underline font-medium"
+                >
+                  cory@salisburybookkeeping.com
+                </a>
+                . We respond to every parent inquiry within 2 business days.
+              </p>
+            </section>
+
+            <section className="pt-4 border-t border-gray-200">
+              <p className="text-[#6B7280] text-xs">
+                CalmKids Academy is published by Salisbury Bookkeeping LLC.
+              </p>
             </section>
           </div>
         </div>

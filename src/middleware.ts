@@ -1,44 +1,17 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { refreshSession } from "@/lib/supabase/middleware";
 
 /**
- * Middleware to refresh Supabase session and protect routes
- * Runs on every request to the application
+ * Middleware — refreshes the Supabase session on every request so that
+ * server components get fresh auth cookies. CalmKids Academy doesn't
+ * gate any routes in middleware; all pages are public (checkout, privacy,
+ * terms, pricing, home) except API endpoints that check auth themselves.
  */
 export async function middleware(request: NextRequest) {
-  const { response, user } = await refreshSession(request);
-
-  const isAuthRoute = request.nextUrl.pathname === "/login" ||
-    request.nextUrl.pathname === "/signup" ||
-    request.nextUrl.pathname === "/auth/callback";
-
-  const isDemoRoute = request.nextUrl.pathname === "/demo";
-  const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin") ||
-    request.nextUrl.pathname.startsWith("/api/admin");
-
-  // Redirect authenticated users away from auth pages
-  if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  // Allow demo route for unauthenticated users
-  if (isDemoRoute) {
-    return response;
-  }
-
-  // Redirect unauthenticated users trying to access protected routes
-  if ((isDashboardRoute || isAdminRoute) && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // Return the response with refreshed session
+  const { response } = await refreshSession(request);
   return response;
 }
 
-/**
- * Configuration for which routes should run through middleware
- */
 export const config = {
   matcher: [
     /*

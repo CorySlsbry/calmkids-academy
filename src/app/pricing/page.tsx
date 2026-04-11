@@ -11,62 +11,42 @@ import {
   CheckCircle2, Shield, Gift, Users, BookOpen, Award, Download,
   ArrowRight, Leaf, Star, XCircle
 } from "lucide-react"
+import { ReferralModal } from "@/components/ReferralModal"
 
-const PRICES = {
-  monthly:  { id: process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY  ?? "", amount: "$4.99",  period: "/ month",  mode: "subscription" as const },
-  annual:   { id: process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL   ?? "", amount: "$79",    period: "/ year",   mode: "subscription" as const },
-  lifetime: { id: process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME ?? "", amount: "$199",   period: "one-time", mode: "payment"      as const },
-}
-
-function PricingCTA({ priceEnvKey, mode, label, className }: {
-  priceEnvKey: "monthly" | "annual" | "lifetime"
-  mode: "subscription" | "payment"
-  label: string
-  className?: string
-}) {
-  const [loading, setLoading] = useState(false)
-
-  const handleClick = async () => {
-    setLoading(true)
-    try {
-      const priceId =
-        priceEnvKey === "monthly"  ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY  :
-        priceEnvKey === "annual"   ? process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL   :
-                                     process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME
-
-      if (!priceId) {
-        alert("Pricing not configured yet. Please check back soon!")
-        setLoading(false)
-        return
-      }
-
-      const res  = await fetch("/api/checkout", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ priceId, mode }),
-      })
-      const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else alert(data.error ?? "Something went wrong.")
-    } catch {
-      alert("Network error. Please try again.")
-    }
-    setLoading(false)
-  }
-
-  return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className={className}
-      aria-label={label}
-    >
-      {loading ? "Redirecting…" : label}
-    </button>
-  )
+const PRICE_IDS = {
+  monthly:  process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY  ?? "",
+  annual:   process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL   ?? "",
+  lifetime: process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME ?? "",
 }
 
 export default function PricingPage() {
+  const [pendingPriceId, setPendingPriceId] = useState<string | null>(null)
+
+  function PricingCTA({ priceEnvKey, label, className }: {
+    priceEnvKey: "monthly" | "annual" | "lifetime"
+    label: string
+    className?: string
+  }) {
+    const priceId = PRICE_IDS[priceEnvKey]
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          if (!priceId) {
+            alert("Pricing not configured yet. Please check back soon!")
+            return
+          }
+          setPendingPriceId(priceId)
+        }}
+        disabled={!priceId}
+        className={className}
+        aria-label={label}
+      >
+        {label}
+      </button>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFDF8]">
       {/* Nav */}
@@ -143,7 +123,6 @@ export default function PricingPage() {
               </ul>
               <PricingCTA
                 priceEnvKey="monthly"
-                mode="subscription"
                 label="Start Free Trial"
                 className="w-full bg-gray-100 text-[#1F2937] font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors min-h-[44px]"
               />
@@ -174,7 +153,6 @@ export default function PricingPage() {
               </ul>
               <PricingCTA
                 priceEnvKey="annual"
-                mode="subscription"
                 label="Start Free Trial"
                 className="w-full bg-[#B45309] text-white font-bold py-3 rounded-xl hover:bg-[#92400E] transition-colors min-h-[44px]"
               />
@@ -213,7 +191,6 @@ export default function PricingPage() {
               </ul>
               <PricingCTA
                 priceEnvKey="lifetime"
-                mode="payment"
                 label="Get Lifetime Access"
                 className="w-full bg-white text-[#1F2937] font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors min-h-[44px]"
               />
@@ -258,6 +235,13 @@ export default function PricingPage() {
           </p>
         </div>
       </main>
+
+      <ReferralModal
+        open={pendingPriceId !== null}
+        onClose={() => setPendingPriceId(null)}
+        priceId={pendingPriceId}
+        appName="CalmKids Academy"
+      />
     </div>
   )
 }

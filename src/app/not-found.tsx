@@ -1,32 +1,35 @@
 import Link from 'next/link';
+import { Leaf } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="bg-[#0a0a0f] text-[#e8e8f0] min-h-screen flex items-center justify-center px-4">
+    <div className="bg-[#FFFDF8] text-[#1F2937] min-h-screen flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        <div className="font-bold text-3xl tracking-tight mb-6">
-          <span className="text-[#6366f1]">Builder</span>
-          <span className="text-[#e8e8f0]">CFO</span>
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 bg-[#B45309] rounded-xl flex items-center justify-center">
+            <Leaf className="w-5 h-5 text-white" aria-hidden="true" />
+          </div>
+          <span className="font-black text-[#1F2937] text-lg">CalmKids Academy</span>
         </div>
 
-        <h1 className="text-6xl font-bold text-[#6366f1] mb-4">404</h1>
-        <p className="text-lg text-[#e8e8f0] mb-2">Page Not Found</p>
-        <p className="text-sm text-[#8888a0] mb-8">
+        <h1 className="text-6xl font-black text-[#B45309] mb-4">404</h1>
+        <p className="text-lg text-[#1F2937] mb-2 font-semibold">Page not found</p>
+        <p className="text-sm text-[#6B7280] mb-8">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
 
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-3">
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-lg font-semibold text-[#e8e8f0] bg-[#1e1e2e] hover:bg-[#2a2a3d] transition text-sm"
+            className="px-5 py-3 rounded-xl font-bold text-[#1F2937] bg-gray-100 hover:bg-gray-200 transition text-sm"
           >
-            Go to Homepage
+            Go to Home
           </Link>
           <Link
-            href="/signup"
-            className="px-5 py-2.5 rounded-lg font-semibold text-white bg-[#6366f1] hover:bg-[#5558d9] transition text-sm"
+            href="/pricing"
+            className="px-5 py-3 rounded-xl font-bold text-white bg-[#B45309] hover:bg-[#92400E] transition text-sm"
           >
-            Start Free Trial
+            See Pricing
           </Link>
         </div>
       </div>

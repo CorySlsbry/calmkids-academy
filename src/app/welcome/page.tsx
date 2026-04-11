@@ -118,10 +118,10 @@ function WelcomeContent() {
             Download the App
           </a>
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-flex items-center justify-center gap-2 border-2 border-[#0F766E] text-[#0F766E] font-bold px-8 py-4 rounded-2xl hover:bg-[#CCFBF1] transition-colors min-h-[44px] text-sm"
           >
-            Go to Parent Dashboard
+            Back to Home
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Link>
         </div>
