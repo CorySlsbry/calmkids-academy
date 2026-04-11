@@ -15,7 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, APP_URL } from "@/lib/stripe";
+import { stripe, APP_URL, ensureReferralCoupon, getStripe } from "@/lib/stripe";
 import Stripe from "stripe";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +61,9 @@ export async function POST(req: NextRequest) {
 
     const cookieRefCode = req.cookies.get("ref_code")?.value;
     const refCode = refCodeFromBody || cookieRefCode || undefined;
+    // Any refCode (body OR cookie) triggers the 20% coupon —
+    // covers both referrer modal submit and friend invite-link arrivals.
+    const shouldDiscount = Boolean(refCode) || Boolean(applyReferralDiscount);
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode,
@@ -74,6 +77,7 @@ export async function POST(req: NextRequest) {
         payment_origin: "parent_web",
         priceId,
         refCode: refCode || "",
+        referralIntent: applyReferralDiscount ? "referrer" : (refCode ? "friend" : "none"),
         schema: process.env.NEXT_PUBLIC_APP_SCHEMA || "calmkids",
       },
     };
@@ -82,7 +86,12 @@ export async function POST(req: NextRequest) {
       sessionParams.customer_email = customerEmail.trim();
     }
 
-    if (applyReferralDiscount && refCode) {
+    if (shouldDiscount) {
+      try {
+        await ensureReferralCoupon(getStripe(), REFERRAL_COUPON_ID);
+      } catch (couponErr) {
+        console.warn("[checkout] ensureReferralCoupon failed — continuing without discount", couponErr);
+      }
       sessionParams.discounts = [{ coupon: REFERRAL_COUPON_ID }];
     } else {
       sessionParams.allow_promotion_codes = true;

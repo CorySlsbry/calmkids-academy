@@ -2,13 +2,26 @@ import { type NextRequest } from "next/server";
 import { refreshSession } from "@/lib/supabase/middleware";
 
 /**
- * Middleware — refreshes the Supabase session on every request so that
- * server components get fresh auth cookies. CalmKids Academy doesn't
- * gate any routes in middleware; all pages are public (checkout, privacy,
- * terms, pricing, home) except API endpoints that check auth themselves.
+ * Middleware — refreshes the Supabase session and captures referral arrivals
+ * (?r=CODE or ?ref=CODE) into a 30-day cookie so the referred friend gets
+ * 20% off automatically at checkout. CalmKids Academy doesn't gate any
+ * routes in middleware; all pages are public except API endpoints that
+ * check auth themselves.
  */
 export async function middleware(request: NextRequest) {
   const { response } = await refreshSession(request);
+
+  const incomingRef =
+    request.nextUrl.searchParams.get("r") ||
+    request.nextUrl.searchParams.get("ref");
+  if (incomingRef && !request.cookies.get("ref_code")?.value) {
+    response.cookies.set("ref_code", incomingRef.toUpperCase(), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: "lax",
+    });
+  }
+
   return response;
 }
 

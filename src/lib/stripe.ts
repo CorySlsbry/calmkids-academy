@@ -48,3 +48,31 @@ export const stripe = new Proxy({} as Stripe, {
     return (getStripe() as any)[prop];
   },
 });
+
+/**
+ * Idempotent: ensures a 20%-off-forever coupon exists in Stripe with the given id.
+ * First call on a fresh Stripe account creates it; subsequent calls are no-ops.
+ * Used by the referral flow so the discount can be applied at checkout
+ * without a manual dashboard step.
+ */
+const _ensuredCoupons = new Set<string>();
+export async function ensureReferralCoupon(stripeClient: Stripe, couponId: string): Promise<void> {
+  if (_ensuredCoupons.has(couponId)) return;
+  try {
+    await stripeClient.coupons.retrieve(couponId);
+    _ensuredCoupons.add(couponId);
+    return;
+  } catch (err: any) {
+    if (err?.statusCode !== 404 && err?.code !== "resource_missing") {
+      throw err;
+    }
+  }
+  await stripeClient.coupons.create({
+    id: couponId,
+    percent_off: 20,
+    duration: "forever",
+    name: "Refer 2 Friends — 20% Off Forever",
+    metadata: { source: "refer2_flow" },
+  });
+  _ensuredCoupons.add(couponId);
+}
