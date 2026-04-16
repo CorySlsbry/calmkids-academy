@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   // NOTE: Static export (`output: 'export'`) is incompatible with the app's server-side
   // API routes (Supabase, Stripe webhooks, etc.). For the Android/Capacitor build we
   // point Capacitor at the deployed Vercel URL instead of a local static bundle.
